@@ -1,0 +1,106 @@
+' ==============================================================================
+' NAMA PROJEK: FRAUD-X (Integrated Risk Diagnostic & Smart Sentinel System)
+' VERSI: 2.0 (Professional Edition)
+' DESKRIPSI: Enjin utama untuk pemprosesan data, pemarkahan, dan simulasi.
+' ==============================================================================
+
+Option Explicit
+
+' Konstanta untuk Nama Helaian (Sheet Names)
+Private Const SH_HOME As String = "Home"
+Private Const SH_INPUT As String = "Input_Data"
+Private Const SH_SCORING As String = "FHT_Scoring"
+Private Const SH_DASHBOARD As String = "FRI_Dashboard"
+Private Const SH_SIMULATION As String = "Scenario_Simulation"
+
+' ==========================================
+' 1. MODUL NAVIGASI (Navigation)
+' ==========================================
+Sub GoToHome(): Sheets(SH_HOME).Activate: End Sub
+Sub GoToInput(): Sheets(SH_INPUT).Activate: End Sub
+Sub GoToScoring(): Sheets(SH_SCORING).Activate: End Sub
+Sub GoToDashboard(): Sheets(SH_DASHBOARD).Activate: End Sub
+Sub GoToSimulation(): Sheets(SH_SIMULATION).Activate: End Sub
+
+' ==========================================
+' 2. ENJIN PEMARKAHAN (FHT Scoring Engine)
+' ==========================================
+Sub RunFullProcess()
+    ' Jalankan semua proses secara berturutan
+    Call CleanData
+    Call CalculateRiskScores
+    Call UpdateDashboardUI
+    MsgBox "FRAUD-X: Pemprosesan data dan pemarkahan selesai!", vbInformation, "Status Sistem"
+End Sub
+
+Sub CalculateRiskScores()
+    Dim wsInput As Worksheet, wsScore As Worksheet
+    Set wsInput = Sheets(SH_INPUT)
+    Set wsScore = Sheets(SH_SCORING)
+    
+    Application.ScreenUpdating = False
+    
+    ' Trigger pengiraan pada sheet scoring
+    wsScore.Calculate
+    
+    ' Logik tambahan: Jika skor melebihi ambang (threshold), beri amaran
+    ' Contoh: Anda boleh menambah logik pewarnaan di sini
+    
+    Application.ScreenUpdating = True
+End Sub
+
+' ==========================================
+' 3. MODUL SIMULASI (Scenario Simulation)
+' ==========================================
+Sub RunSimulation()
+    Dim wsSim As Worksheet
+    Set wsSim = Sheets(SH_SIMULATION)
+    
+    ' Pastikan pengguna ingin menjalankan simulasi
+    Dim conf As VbMsgBoxResult
+    conf = MsgBox("Mulakan simulasi senario 'What-If'?", vbQuestion + vbYesNo, "Confirm Simulation")
+    
+    If conf = vbYes Then
+        Application.Calculation = xlCalculationAutomatic
+        ' Update graf atau nilai berdasarkan input simulasi
+        Sheets(SH_DASHBOARD).Calculate
+        Sheets(SH_DASHBOARD).Activate
+        MsgBox "Simulasi selesai. Sila lihat impak pada Dashboard.", vbInformation
+    End If
+End Sub
+
+Sub ResetSimulation()
+    ' Mengembalikan nilai input kepada asal (Baseline)
+    ' Anda perlu menentukan range mana yang perlu direset
+    On Error Resume Next
+    Sheets(SH_SIMULATION).Range("B5:B10").Value = 0 ' Contoh reset multiplier
+    MsgBox "Senario telah direset ke Baseline.", vbExclamation
+End Sub
+
+' ==========================================
+' 4. PENGURUSAN DATA & DASHBOARD
+' ==========================================
+Sub CleanData()
+    ' Membersihkan data lama sebelum input baru (Optional)
+    ' Sheets(SH_INPUT).Range("A2:Z1000").ClearContents
+End Sub
+
+Sub UpdateDashboardUI()
+    ' Refresh semua Pivot Tables dan Carta
+    Dim pc As PivotCache
+    For Each pc In ThisWorkbook.PivotCaches
+        pc.Refresh
+    Next pc
+    
+    ' Update timestamp terakhir dikemaskini
+    Sheets(SH_DASHBOARD).Range("A1").Value = "Kemas Kini Terakhir: " & Now
+End Sub
+
+' ==========================================
+' 5. FUNGSI AUTOMASI (Auto-Open)
+' ==========================================
+Sub Auto_Open()
+    ' Berjalan secara automatik apabila fail dibuka
+    MsgBox "Selamat Datang ke FRAUD-X Smart Sentinel System", vbInformation, "FRAUD-X System Initialized"
+    Sheets(SH_HOME).Activate
+End Sub
